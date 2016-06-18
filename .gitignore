@@ -1,0 +1,13 @@
+# directories
+lib/
+bin/
+share/
+include/
+uwsgi/
+website/delivery/migrations
+
+# files
+/pip-selfcheck.json
+*.pyc
+settings.py
+
