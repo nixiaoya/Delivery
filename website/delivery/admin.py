@@ -8,6 +8,6 @@ admin.site.register(models.User,User_Admin)
 
 class SMSLog_Admin(admin.ModelAdmin):
     search_fields = ("phoneNum",)
-    list_display = ("jobStart","phoneNum","content","respStatus","respMsg")
+    list_display = ("jobStart","phoneNum","content","jobSuccess","log")
 admin.site.register(models.SMSLog,SMSLog_Admin)
 

@@ -31,7 +31,8 @@ def send_sms(phone_num):
         code = code,
         phone_num = phone_num
         )
-    status = sms.send(encrypt=False)
+    #status = sms.send(encrypt=False)
+    status = True 
     return (status,code)
 
 def send_email(email,report_file_name):

@@ -1,0 +1,59 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Title -->
+        <title>错误 | 华汉基因</title>
+
+        <!-- Meta -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="自动化报告, 华汉基因">
+        <meta name="author" content="Fan | Vince">
+
+        <!-- Favicon -->
+        <link rel="shortcut icon" href={% static "huahan/img/favicon.ico.ico"%}>
+
+        <!-- Global CSS -->
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href={% static "huahan/plugins/bootstrap/css/bootstrap.min.css"%} />
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href={% static "huahan/plugins/font-awesome/css/font-awesome.min.css"%} />
+        <!-- Customed -->
+        <link rel="stylesheet" href={% static "huahan/css/custom.css"%} />
+        <link rel="stylesheet" href={% static "huahan/css/button.css"%} />
+
+    </head>
+
+    <body>
+        <div id="container">
+            <h1 class="error"><span>404</span> 错误</h1>
+
+            <a href="{% url 'home' %}">
+                <button class="error" >
+                    <img class="splash" src={% static "huahan/img/watersplash_3.svg"%} alt="Splash!" />
+                    <img class="splash splash-2" src={% static "huahan/img/watersplash_3.svg"%} alt="Splash!" />
+                    <img class="sub Submarine" src={% static "huahan/img/sublogo_16.svg"%} />
+                    <img class="submerge" src={% static "huahan/img/submerge.svg"%} alt="Water" />
+                    <span class="main-text">
+                        <span class="submit">游回</span> 主页
+                    </span>
+                </button>
+            </a>
+
+            <!-- Content -->
+            <div class="form">
+                <div class="form-toggle"></div>
+            </div>
+        </div>
+        <!-- Form-->
+
+        <!-- Footer -->
+        <div id="footer">
+            <p class="contact">为了您更好地使用体验，请使用最新版本的浏览器（google chrome 浏览器、火狐浏览器、360浏览器、IE 9+ 浏览器等）进行访问。<i class="fa fa-paper-plane-o text-info" aria-hidden="true"></i> 遇到问题，联系我们：<a href="mailto:info@hhgene.cn">info@hhgene.cn </a> </p>
+        </div>
+
+
+    </body>
+</html>

@@ -1,30 +1,44 @@
 #coding=utf-8
-from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.template.loader import get_template
+from django.shortcuts import render
 
 from delivery.functions import *
 from delivery.models import *
 
 import re
 
-class MyException(Exception):
-    pass
-
-
-def auth_required(func):
+def auth_required_json(func):
     def _auth_required(request):
         if not getSession(request):
-            # context = {
-            #     "status":1,
-            #     "msg":u"手机号未验证"
-            #     }
-            # return JsonResponse(context)
-            return HttpResponse("未授权的操作")
+            context = {
+                'status':'-1',
+                'msg':u'未授权的操作'
+                }
+            return JsonResponse(context) 
         else:
             return func(request)
     return _auth_required
 
+def auth_required_html(func):
+    def _auth_required(request):
+        if not getSession(request):
+            return error404(request) 
+        else:
+            return func(request)
+    return _auth_required
+
+def error404(request):
+    context = {}
+    template = get_template("main/404.html")
+    html = template.render(context,request)
+    return HttpResponse(html, status=404)
+    
+def error500(request):
+    context = {}
+    template = get_template("main/500.html")
+    html = template.render(context,request)
+    return HttpResponse(html, status=500)
 
 def Home(request):
     context = {}
@@ -46,12 +60,18 @@ def sendSMS(request):
         if send_success:
             if User.objects.filter(phoneNum = phone_num).exists():
                 u = User.objects.get(phoneNum = phone_num)
+                if not u.codeExpired():
+                    status_code = 3
+                    msg = u'请勿重复请求'
+                else:
+                    u.init_user(str(sms_code))
+                    u.save()
             else:
                 u = User(
                     phoneNum = phone_num,
                     )
-            u.init_user(str(sms_code))
-            u.save()
+                u.init_user(str(sms_code))
+                u.save()
         else:
             status_code = 2
             msg = u"验证短信发送失败"
@@ -90,7 +110,7 @@ def postSMS(request):
     }
     return JsonResponse(context)
 
-@auth_required
+@auth_required_json
 def sendMail(request):
     '''
     发送报告
@@ -115,6 +135,7 @@ def sendMail(request):
             status_code = 1
         report_file = ""
     else:
+        msg = u'下载链接已生成'
         report_file = "download/?f=%s" % u.report
     context = {
         "status":status_code,
@@ -123,12 +144,11 @@ def sendMail(request):
     }
     return JsonResponse(context)
 
-@auth_required
+@auth_required_html
 def Download(request):
     file_name = request.GET.get("f","").strip()
-    # 防止其他人的session获取文件
     user_id = getSession(request)
     if file_name and User.objects.filter(userID = user_id, report = file_name).count() == 1:
         return getFile(request,file_name)
     else:
-        return HttpResponse(u"未授权的文件下载")
+        return error404(request) 

@@ -31,7 +31,6 @@
                 <img src={% static "huahan/img/logo.png"%} alt="" />
             </div>
 
-
             <!-- Content -->
             <div class="form">
                 <div class="form-toggle"></div>
@@ -45,18 +44,19 @@
                                 <div class="form-group">
                                     <label for="phonenumber"><i class="fa fa-phone text-primary" aria-hidden="true"></i> 手机号 Phone Number</label>
                                     <input type="text" name="phonenumber" required="required" value="" />
-                                    <input type="button" class="btn btn-warning" style="margin: 5px 0px; width: 25%" value="获取验证码" onclick="sendCode(this)">
-                                    <p id="emptynotice" class="noticetwo" style="display: none">输入的号码不能为空！请输入手机号！</p>
-                                    <p id="wrongnotice" class="noticetwo" style="display: none">您输入的手机号码格式不正确！请重新输入！</p>
+                                    <input type="button" class="btn btn-warning" style="margin: 5px 0px; width: 25%" value="获取验证码" onclick="sendCode(this)" autocomplete="off">
+                                    <p id="emptynotice" class="noticetwo" style="display: none"><i class="fa fa-info-circle" aria-hidden="true"></i> 输入的号码不能为空！请输入手机号！</p>
+                                    <p id="wrongnotice" class="noticetwo" style="display: none"><i class="fa fa-info-circle" aria-hidden="true"></i> 您输入的手机号码格式不正确！请重新输入！</p>
 
                                 </div>
                                 <!-- <button type="submit" class="btn btn-primary">点击发送验证码</button> -->
                                 <div class="form-group">
                                     <label for="verificationcode"><i class="fa fa-keyboard-o text-primary" aria-hidden="true"></i> 短信验证码 Verification code</label>
                                     <input type="verificationcode" id="verificationcode" name="verificationcode" required="required"/>
-                                    <p id="emptycodenotice" class="noticetwo" style="display: none">输入的验证码不能为空！请输入验证码！</p>
-                                    <p id="wrongcodenotice" class="noticetwo" style="display: none">输入的验证码不正确！请输入正确的验证码！</p>
-                                    <p id="numbernotice" class="noticetwo" style="display: none">您输入的验证码与手机号不匹配！请重新输入！</p>
+                                    <p id="emptycodenotice" class="noticetwo" style="display: none"><i class="fa fa-info-circle" aria-hidden="true"></i> 输入的验证码不能为空！请输入验证码！</p>
+                                    <p id="wrongcodenotice" class="noticetwo" style="display: none"><i class="fa fa-info-circle" aria-hidden="true"></i> 输入的验证码不正确！请输入正确的验证码！</p>
+                                    <p id="numbernotice" class="noticetwo" style="display: none"><i class="fa fa-info-circle" aria-hidden="true"></i> 您输入的验证码与手机号不匹配！请重新输入！</p>
+                                    <p id="expiredcodenotice" class="noticetwo" style="display: none"><i class="fa fa-info-circle" aria-hidden="true"></i> 您输入的验证码已经过期！请输入手机号重新获取！</p>
                                 </div>
 
                                 <div class="form-group">
@@ -75,10 +75,17 @@
                             <div class="form-group">
                                 <label for="email"><i class="fa fa-envelope-o" aria-hidden="true"></i> 邮箱地址 Email Address</label>
                                 <input type="email" id="email" name="email" value="" />
-                                <p id="emailnotice" class="noticetwo" style="display: none;">请输入正确格式的邮箱！</p>
+                                <p id="emailnotice" class="noticetwo" style="display: none;"><i class="fa fa-info-circle" aria-hidden="true"></i> 请输入正确格式的邮箱地址！</p>
+                                <p id="emailfailnotice" class="noticetwo" style="display: none;"><i class="fa fa-info-circle" aria-hidden="true"></i> 邮件发送失败，请重新发送！</p>
+                                <p id="emailsuccessnotice" class="noticetwo" style="display: none;"><i class="fa fa-check-circle-o" aria-hidden="true"></i> 邮件发送成功！</p>
                             </div>
                             <div class="form-group">
                                 <button type="submit" id="download">点击下载 Download</button>
+                            </div>
+
+                            <div class="loader">
+                                <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                                <span class="sr-only">Loading...</span>
                             </div>
                         </form>
                     </div>
@@ -89,7 +96,7 @@
 
         <!-- Footer -->
         <div id="footer">
-            <p class="contact">为了您更好地使用体验，请使用最新版本的浏览器（google chrome 浏览器、火狐浏览器、360浏览器、IE 9+ 浏览器等）进行访问。<i class="fa fa-paper-plane-o text-info" aria-hidden="true"></i> 遇到问题，联系我们：<a href="mailto:info@hhgene.cn">info@hhgene.cn </a> </p>
+            <p class="contact">为了更好的使用体验，请使用最新版本的浏览器（google chrome 浏览器、火狐浏览器、360浏览器、IE 9+ 浏览器等）进行访问。<i class="fa fa-paper-plane-o text-info" aria-hidden="true"></i> 遇到问题，联系我们：<a href="mailto:info@hhgene.cn">info@hhgene.cn </a> </p>
         </div>
 
 
@@ -98,115 +105,119 @@
         <script src={% static "huahan/js/csrf_token.js"%} ></script>
         <script>
 
-            // $(document).ready(function() {
-                // Verification
-                var clock = '';
-                var nums = 20;
-                var btn;
-                
-                function getSmsMsg(phoneNum){
-                    var respData;
-                    $.ajax({
-                        type:"post",
-                        dataType:"json",
-                        url:"sendSMS/",
-                        async:false,
-                        data:{ 
-                            "phone_num":phoneNum,     
-                            }, 
-                        success: function (data) {
-                                respData = data;
-                            }               
-                        });
-                    return respData;
-                }
-                
-                function postSmsMsg(phoneNum,smsCode){
-                    var respData;
-                    $.ajax({
-                        type:"post",
-                        dataType:"json",
-                        url:"postSMS/",
-                        async:false,
-                        data:{ 
-                            "phone_num":phoneNum,     
-                            "sms_code":smsCode,     
-                            }, 
-                        success: function (data) {
-                                respData = data;
-                            }               
-                        });
-                    return respData;
-                }
-                
-                function downloadReport(email){
-                    var respData;
-                    $.ajax({
-                        type:"post",
-                        dataType:"json",
-                        url:"sendMail/",
-                        async:false,
-                        data:{ 
-                            "email":email,   
-                            }, 
-                        success: function (data) {
-                                respData = data;
-                            }               
-                        });
-                    return respData;
-                }
+            var clock = '';
+            var nums = 30;
+            var btn;
 
-                function sendCode(thisBtn){
-
-                    // Phone Verify
-                    var $phone = $("input[name='phonenumber']");
-                    var phone = $phone.val();
-
-                    if(phone==''){
-                        // alert('手机号码不能为空！');
-                        // $phone.attr('value', ' ');
-                        $('#wrongnotice').hide();
-                        $('#emptynotice').show();
-
-                    }else{
-                        var reg = /(^(13\d|15[^4,\D]|17[13678]|18\d)\d{8}|170[^346,\D]\d{7})$/;
-                        if(!reg.test(phone)){
-                            // alert('手机号码格式不对!');
-                            // $phone.attr('value', ' ');
-                            $('#emptynotice').hide();
-                            $('#wrongnotice').show();
-                        }else{
-                            // 开始请求验证码
-                            getSmsMsg(phone);
-                            
-                            $('#emptynotice').hide();
-                            $('#wrongnotice').hide();
-                            btn = thisBtn;
-                            btn.disabled = true;
-                            btn.value = nums+'秒后可重新获取';
-                            clock = setInterval(doLoop, 1000);
+            function getSmsMsg(phoneNum,csrfmiddlewaretoken){
+                var respData;
+                $.ajax({
+                    type:"post",
+                    dataType:"json",
+                    url:"sendSMS/",
+                    async:false,
+                    data:{
+                        "phone_num":phoneNum,
+                        "csrfmiddlewaretoken": getCookie('csrftoken')
+                        },
+                    success: function (data) {
+                            respData = data;
                         }
-                    }
-                }
-                function doLoop(){
-                    nums--;
-                    if(nums > 0){
-                        btn.value = nums+'秒后可重新获取';
+                    });
+                return respData;
+            }
+
+            function postSmsMsg(phoneNum,smsCode,csrfmiddlewaretoken){
+                var respData;
+                $.ajax({
+                    type:"post",
+                    dataType:"json",
+                    url:"postSMS/",
+                    async:false,
+                    data:{
+                        "phone_num":phoneNum,
+                        "sms_code":smsCode,
+                        "csrfmiddlewaretoken": getCookie('csrftoken')
+                        },
+                    success: function (data) {
+                            respData = data;
+                        }
+                    });
+                return respData;
+            }
+
+            function downloadReport(email, csrfmiddlewaretoken){
+                var respData;
+                $.ajax({
+                    type:"post",
+                    dataType:"json",
+                    url:"sendMail/",
+                    async:false,
+                    data:{
+                        "email":email,
+                        "csrfmiddlewaretoken": getCookie('csrftoken')
+                        },
+                    success: function (data) {
+                            respData = data;
+                        }
+                    });
+                return respData;
+            }
+
+            // 发送验证码事件
+            function sendCode(thisBtn){
+
+                $('#download').text('点击下载 Download');
+
+                // Phone Verify
+                var $phone = $("input[name='phonenumber']");
+                var phone = $phone.val();
+
+                if(phone==''){
+                    // alert('手机号码不能为空！');
+                    // $phone.attr('value', ' ');
+                    $('#wrongnotice').hide();
+                    $('#emptynotice').show();
+
+                }else{
+                    var reg = /(^(13\d|15[^4,\D]|17[13678]|18\d)\d{8}|170[^346,\D]\d{7})$/;
+                    if(!reg.test(phone)){
+                        // alert('手机号码格式不对!');
+                        // $phone.attr('value', ' ');
+                        $('#emptynotice').hide();
+                        $('#wrongnotice').show();
                     }else{
-                        clearInterval(clock);
-                        btn.disabled = false;
-                        btn.value = '点击发送验证码';
-                        nums = 20; //重置时间
+
+                        $('#emptynotice').hide();
+                        $('#wrongnotice').hide();
+                        btn = thisBtn;
+                        btn.disabled = true;
+                        btn.value = nums+'秒后可重新获取';
+                        clock = setInterval(doLoop, 1000);
+
+                        // 开始请求验证码
+                        getSmsMsg(phone);
                     }
                 }
+            }
+            function doLoop(){
+                nums--;
+                if(nums > 0){
+                    btn.value = nums+'秒后可重新获取';
+                }else{
+                    btn.disabled = false;
+                    clearInterval(clock);
+
+                    btn.value = '点击发送验证码';
+                    nums = 30; //重置时间
+                }
+            }
 
 
             // Confirm
             $(document).ready(function() {
                 // var panelOne = $('.form-panel.one').height(),
                 var panelTwo = $('.form-panel.two')[0].scrollHeight;
-
-                // alert(vericode)
 
                 $('#confirmation').not('.form-panel.two.active').on('click', function(e) {
                     e.preventDefault();
@@ -230,13 +241,14 @@
                         $('#numbernotice').hide();
 
                     } else {
-                        // alert(vericode)
+                        // 验证码为空
 
                         if (vericode == '' && phone !== '') {
 
                             if (!reg.test(phone)) {
                                 $('#wrongcodenotice').hide();
                                 $('#emptycodenotice').show();
+                                $('#expiredcodenotice').hide();
 
                                 $('#wrongnotice').show();
                                 $('#emptynotice').hide();
@@ -245,18 +257,21 @@
                             } else {
                                 $('#wrongcodenotice').hide();
                                 $('#emptycodenotice').show();
+                                $('#expiredcodenotice').hide();
 
                                 $('#wrongnotice').hide();
                                 $('#emptynotice').hide();
                                 $('#numbernotice').hide();
-
                             }
 
                         } else {
-                            
+
+                            // 验证码不为空
+
                             if (vericode !== '' && phone == '') {
                                 $('#wrongcodenotice').hide();
                                 $('#emptycodenotice').hide();
+                                $('#expiredcodenotice').hide();
 
                                 $('#wrongnotice').hide();
                                 $('#emptynotice').show();
@@ -265,21 +280,35 @@
                             } else {
                                 // 验证手机号
                                 var respData = postSmsMsg(phone, vericode);
-                                
+
                                 if (respData.status != '0') {
                                     // 验证失败
-                                    
-                                    $('#wrongcodenotice').hide();
-                                    $('#emptycodenotice').hide();
 
-                                    $('#emptynotice').hide();
-                                    $('#wrongnotice').hide();
-                                    $('#numbernotice').show();
+                                    if (respData.status == '1') {
+                                        $('#wrongcodenotice').hide();
+                                        $('#emptycodenotice').hide();
+                                        $('#expiredcodenotice').hide();
 
+                                        $('#emptynotice').hide();
+                                        $('#wrongnotice').hide();
+                                        $('#numbernotice').show();
+
+                                    } else {
+                                        $('#wrongcodenotice').hide();
+                                        $('#emptycodenotice').hide();
+                                        $('#expiredcodenotice').show();
+
+                                        $('#emptynotice').hide();
+                                        $('#wrongnotice').hide();
+                                        $('#numbernotice').hide();
+                                    }
 
                                 } else {
+
+                                    // 验证通过
                                     $('#wrongcodenotice').hide();
                                     $('#emptycodenotice').hide();
+                                    $('#expiredcodenotice').hide();
 
                                     $('#emptynotice').hide();
                                     $('#wrongnotice').hide();
@@ -294,16 +323,20 @@
                                     $('.form').animate({
                                     'height': panelTwo
                                     }, 200);
+
                                 }
-
                             }
-
                         }
                     }
                 });
 
                 $('.form-toggle').on('click', function(e) {
                     e.preventDefault();
+
+                    $('#emailnotice').hide();
+                    $('#emailsuccessnotice').hide();
+                    $('#emailnotice').hide();
+
                     $(this).removeClass('visible');
                     $('.form-panel.one').removeClass('hidden');
                     $('.form-panel.two').removeClass('active');
@@ -324,18 +357,42 @@
                     if (emailaddress !== '') {
 
                         if (emailaddress.match(emailreg)) {
+
+                            // Loading
                             $('#download').text('发送到邮箱 send by email');
                             $('#emailnotice').hide();
-                            
+                            $('#emailsuccessnotice').hide();
+                            $('#emailnotice').hide();
+
                             // 提交 下载
                             var respData = downloadReport(emailaddress);
-                            if (respData.status != "0"){
-                                alert(respData.msg);
-                            }
 
-                        } else {
+                            if (respData.status != "0"){
+                                // alert(respData.msg);
+
+                                if (respData.status == "2") {
+                                    // 发送失败
+                                    $('#emailfailnotice').show();
+                                    $('#emailsuccessnotice').hide();
+                                    $('#emailnotice').hide();
+                                }
+
+                            }else{
+
+                                // alert('邮箱发送成功！')
+                                $('#emailfailnotice').hide();
+                                $('#emailsuccessnotice').show();
+                                $('#emailnotice').hide();
+
+                            }
+                        }else{
+
+                            $('#emailfailnotice').hide();
+                            $('#emailsuccessnotice').hide();
                             $('#emailnotice').show();
+
                         }
+
                     } else {
                         $('#download').text('点击下载 Download');
                         $('#emailnotice').hide();

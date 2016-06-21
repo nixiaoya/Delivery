@@ -27,7 +27,7 @@ class User(models.Model):
     smsCode = models.CharField(max_length=64, blank=True, help_text=u"短信验证码")
     userID = models.CharField(max_length=64, db_index=True, help_text=u"用户临时编码")
     report = models.CharField(max_length=64, blank=True, help_text=u'报告名称')
-    expires=  models.DateTimeField(help_text=u'报告名称')
+    expires=  models.DateTimeField(help_text=u'短信验证码的过期时间')
     
     def genSalt(self):
         m1 = hashlib.md5()
@@ -62,21 +62,21 @@ class User(models.Model):
         return self.userID
         
 class SMSLog(models.Model):
-    phoneNum = models.CharField(max_length=64, blank=True)
-    content = models.CharField(max_length=128, blank=True)
-    sendTime = models.CharField(max_length=64, blank=True)
-    action = models.CharField(max_length=64, blank=True)
-    stamp = models.CharField(max_length=64, blank=True)
-    extno = models.CharField(max_length=64, blank=True)
-    respStatus = models.CharField(max_length=64, blank=True)
-    respMsg = models.CharField(max_length=64, blank=True)
-    respRemain = models.CharField(max_length=64, blank=True)
-    respTaskID = models.CharField(max_length=64, blank=True)
-    respSuccess = models.CharField(max_length=64, blank=True)
-    jobStart = models.DateTimeField(auto_now_add=True)
-    respErrors = models.CharField(max_length=128, blank=True)
-    jobStart = models.DateTimeField(auto_now_add=True)
-    log = models.TextField(blank=True)
+    phoneNum = models.CharField(max_length=64, blank=True, help_text=u'请求参数:[手机号]')
+    content = models.CharField(max_length=128, blank=True, help_text=u'请求参数:[短信内容]')
+    sendTime = models.CharField(max_length=64, blank=True, help_text=u'请求参数:[定时发送时间]')
+    action = models.CharField(max_length=64, blank=True, help_text=u'请求参数:[请求类型]')
+    stamp = models.CharField(max_length=64, blank=True, help_text=u'请求参数:[时间戳](加密请求有效)')
+    extno = models.CharField(max_length=64, blank=True, help_text=u'请求参数:[子网号]')
+    respStatus = models.CharField(max_length=64, blank=True, help_text=u'响应参数:[状态码]')
+    respMsg = models.CharField(max_length=64, blank=True, help_text=u'响应参数:[状态描述信息]')
+    respRemain = models.CharField(max_length=64, blank=True, help_text=u'响应参数:[短信余额]')
+    respTaskID = models.CharField(max_length=64, blank=True, help_text=u'响应参数:[任务编号](服务方生成)')
+    respSuccess = models.CharField(max_length=64, blank=True, help_text=u'响应参数:[任务是否成功]')
+    respErrors = models.CharField(max_length=128, blank=True, help_text=u'响应参数:[错误信息](加密请求有效)')
+    jobStart = models.DateTimeField(auto_now_add=True, help_text=u'验证码请求日期')
+    jobSuccess = models.BooleanField(default=False, help_text=u'任务完成状态')
+    log = models.TextField(blank=True, help_text=u'本地错误日志')
 
     def init_request(self,data):
         if data.has_key("content"):
@@ -126,6 +126,10 @@ class SMSLog(models.Model):
             if data.has_key("Errors") and data["Errors"]:
                 self.respErrors = data["Errors"]
             self.save()
+
+    def set_success(self):
+        self.jobSuccess = True
+        self.save()
 
     def errorlog(self,error):
         self.log += error + "\n"
@@ -264,15 +268,16 @@ class SMS(object):
                 resp_data = json.loads(sms_resp.read())
             except ValueError as e:
                 self.log.errorlog("ValueError: %s" % e)
-                raise MyException(e)
                 return False
             else:
                 self.log.init_response(resp_data)
 
                 if resp_data["StatusCode"] == "1":
+                    self.log.set_success()
                     return True
                 else:
                     return False
+
     def send(self, encrypt = True):
         if encrypt == True:
             return self.send_encrypt()
