@@ -17,6 +17,9 @@ Including another URLconf
 from django.conf.urls import url, include
 from django.contrib import admin
 
+handler404 = 'delivery.views.error404'
+handler500 = 'delivery.views.error500'
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^report/', include('delivery.urls')),
