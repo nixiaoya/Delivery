@@ -24,11 +24,11 @@
 
     </head>
 
-    <body>
+    <body style="background: url({% static "huahan/img/bg.jpg"%});">
         <div id="container">
             <!-- Header -->
             <div id="header">
-                <img src={% static "huahan/img/logo.png"%} alt="" />
+                <img src={% static "huahan/img/lg.png"%} alt="" />
             </div>
 
             <!-- Content -->
@@ -84,10 +84,10 @@
                                 <button type="submit" id="download">点击下载 Download</button>
                             </div>
 
-                            <div class="loader">
+                            <!-- <div class="loader">
                                 <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
                                 <span class="sr-only">Loading...</span>
-                            </div>
+                            </div> -->
                         </form>
                     </div>
                 </div>
@@ -102,12 +102,13 @@
 
 
         <!-- JS -->
-        <script src={% static "huahan/plugins/jquery/jquery-3.0.0.min.js"%} ></script>
+        <script src={% static "huahan/plugins/jquery/jquery-2.0.0.min.js"%} ></script>
+        <script src={% static "huahan/plugins/bootstrap/js/bootstrap.min.js"%} ></script>
         <script src={% static "huahan/js/csrf_token.js"%} ></script>
         <script>
 
             var clock = '';
-            var nums = 30;
+            var nums = 60;
             var btn;
 
             function getSmsMsg(phoneNum,csrfmiddlewaretoken){
@@ -117,6 +118,7 @@
                     dataType:"json",
                     url:"sendSMS/",
                     async:false,
+                    global:false,
                     data:{
                         "phone_num":phoneNum,
                         "csrfmiddlewaretoken": getCookie('csrftoken')
@@ -135,6 +137,7 @@
                     dataType:"json",
                     url:"postSMS/",
                     async:false,
+                    global:false,
                     data:{
                         "phone_num":phoneNum,
                         "sms_code":smsCode,
@@ -162,7 +165,6 @@
                             respData = data;
                         }
                     });
-                return respData;
             }
 
             // 发送验证码事件
@@ -197,7 +199,26 @@
                         clock = setInterval(doLoop, 1000);
 
                         // 开始请求验证码
-                        getSmsMsg(phone);
+                        var respData = getSmsMsg(phone);
+
+                        var $success = '<div class="alert alert-success alert-dismissible" style="width: 30%; margin: 0 auto; padding-top: 20px " role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>发送成功!</strong> 您的短信密码已经发送成功，密码的有效时间是<strong> 60秒 </strong>！请注意查收！</div>';
+
+                        var $warning = '<div class="alert alert-warning alert-dismissible" style="width: 30%; margin: 0 auto; padding-top: 20px " role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>发送失败!</strong> 请勿短时间内重复提交！ 请间隔 <strong>1分钟</strong> 后再操作 ！</div>'
+
+                        var $fail = '<div class="alert alert-danger alert-dismissible" style="width: 30%; margin: 0 auto; padding-top: 20px " role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>发送失败!</strong> 请勿短时间内重复提交！ 请间隔 <strong>1分钟</strong> 后再操作 ！</div>'
+
+                        if(respData.status == "0"){
+
+                            $('.alert').hide();
+                            $('#header').after($success);
+                        }else if(respData.status == "3"){
+                            $('.alert').hide();
+                            $('#header').after($warning)
+
+                        }else if(respData.status == "2"){
+                            $('.alert').hide();
+                            $('#header').after($fail)
+                        }
                     }
                 }
             }
@@ -210,7 +231,7 @@
                     clearInterval(clock);
 
                     btn.value = '点击发送验证码';
-                    nums = 30; //重置时间
+                    nums = 60; //重置时间
                 }
             }
 
@@ -357,10 +378,12 @@
 
                     if (emailaddress !== '') {
 
+                        $('#download').text('发送到邮箱 send by email');
+
                         if (emailaddress.match(emailreg)) {
 
                             // Loading
-                            $('#download').text('发送到邮箱 send by email');
+
                             $('#emailnotice').hide();
                             $('#emailsuccessnotice').hide();
                             $('#emailnotice').hide();

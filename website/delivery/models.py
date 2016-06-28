@@ -83,8 +83,8 @@ class SMSLog(models.Model):
             self.content = data["content"]
         if data.has_key("mobile"):
             self.phoneNum = data["mobile"]
-        if data.has_key("Mobile"):
-            self.phoneNum = data["Mobile"]
+        if data.has_key("Moblie"):
+            self.phoneNum = data["Moblie"]
         if data.has_key("sendTime"):
             self.sendTime = data["sendTime"]
         if data.has_key("action"):
@@ -163,8 +163,10 @@ class SMS(object):
         self.smsEnAPI= settings.SMS_EN_HOST
         self.smsAccount = settings.SMS_ACCOUNT
         self.smsPassword = settings.SMS_PASSWORD
-        self.content = '手机验证码为: ' + \
+        self.smsUserID = settings.SMS_USER_ID
+        self.content = '您的动态密码是:' + \
                         str(code) + \
+                        '，60秒内有效。请勿把密码泄露给其他人。祝您生活愉快！' + \
                         '【' + settings.SERVICE_FROM + '】'
         self.phone_num = phone_num
         self.extno = extno
@@ -217,6 +219,7 @@ class SMS(object):
                 self.log.init_response(resp_data)
 
                 if resp_data["returnstatus"] == "Success":
+                    self.log.set_success()
                     return True
                 else:
                     return False
@@ -229,11 +232,10 @@ class SMS(object):
        
         secret = self.e1(stamp)
         req_data = {
-            "userid":"",
             "UserName":self.smsAccount,
             "Stamp":stamp,
             "Secret":secret,
-            "Mobile":self.phone_num,
+            "Moblie":self.phone_num,
             "Text":self.content,
             "Ext":self.extno,
             "SendTime":self.sendTime
@@ -245,6 +247,7 @@ class SMS(object):
         encrypt_req_str = des.encrypt(req_str)
 
         encrypt_req_data = {
+            "UserId":self.smsUserID,
             "Text64":encrypt_req_str
         }
 
@@ -272,7 +275,7 @@ class SMS(object):
             else:
                 self.log.init_response(resp_data)
 
-                if resp_data["StatusCode"] == "1":
+                if resp_data["StatusCode"] == 1:
                     self.log.set_success()
                     return True
                 else:
