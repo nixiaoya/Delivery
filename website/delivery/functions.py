@@ -38,7 +38,7 @@ def send_email(email,report_file_name):
     '''
     一次性动作，不记录状态
     '''
-    email_subject = "Report for xx"
+    email_subject = u'【' + settings.SERVICE_FROM + u'】' + u'体检报告下载'
     email_body = render_to_string("message/report.txt",{})
     email = EmailMessage(
         email_subject,
