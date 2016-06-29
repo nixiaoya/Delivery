@@ -165,6 +165,7 @@
                             respData = data;
                         }
                     });
+                return respData;
             }
 
             // 发送验证码事件
@@ -199,7 +200,7 @@
                         clock = setInterval(doLoop, 1000);
 
                         // 开始请求验证码
-                        var respData = getSmsMsg(phone);
+                        var smsData = getSmsMsg(phone);
 
                         var $success = '<div class="alert alert-success alert-dismissible" style="width: 30%; margin: 0 auto; padding-top: 20px " role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>发送成功!</strong> 您的短信密码已经发送成功，密码的有效时间是<strong> 60秒 </strong>！请注意查收！</div>';
 
@@ -207,17 +208,17 @@
 
                         var $fail = '<div class="alert alert-danger alert-dismissible" style="width: 30%; margin: 0 auto; padding-top: 20px " role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button><strong>发送失败!</strong> 请勿短时间内重复提交！ 请间隔 <strong>1分钟</strong> 后再操作 ！</div>'
 
-                        if(respData.status == "0"){
+                        if(smsData.status == "0"){
 
                             $('.alert').hide();
-                            $('#header').after($success);
-                        }else if(respData.status == "3"){
+                            $('#header').after($success).stop().next().delay(3000).slideUp('slow')
+                        }else if(smsData.status == "3"){
                             $('.alert').hide();
-                            $('#header').after($warning)
+                            $('#header').after($warning).stop().next().delay(3000).slideUp('slow')
 
-                        }else if(respData.status == "2"){
+                        }else if(smsData.status == "2"){
                             $('.alert').hide();
-                            $('#header').after($fail)
+                            $('#header').after($fail).stop().next().delay(3000).slideUp('slow')
                         }
                     }
                 }

@@ -56,25 +56,31 @@ def sendSMS(request):
 
     re1 = re.compile(r'^\d{11}$')
     if re1.match(phone_num):
-        (send_success,sms_code) = send_sms(phone_num)
-        if send_success:
-            if User.objects.filter(phoneNum = phone_num).exists():
-                u = User.objects.get(phoneNum = phone_num)
-                if not u.codeExpired():
-                    status_code = 3
-                    msg = u'请勿重复请求'
-                else:
+
+        if User.objects.filter(phoneNum = phone_num).exists():
+            u = User.objects.get(phoneNum = phone_num)
+            if not u.codeExpired():
+                status_code = 3
+                msg = u'请勿重复请求'
+            else:
+                (send_success,sms_code) = send_sms(phone_num)
+                if send_success:
                     u.init_user(str(sms_code))
                     u.save()
-            else:
+                else:
+                    status_code = 2
+                    msg = u"验证短信发送失败"
+        else:
+            (send_success,sms_code) = send_sms(phone_num)
+            if send_success:
                 u = User(
                     phoneNum = phone_num,
                     )
                 u.init_user(str(sms_code))
                 u.save()
-        else:
-            status_code = 2
-            msg = u"验证短信发送失败"
+            else:
+                status_code = 2
+                msg = u"验证短信发送失败"
     else:
         status_code = 1
         msg = u"非法的手机号码"
